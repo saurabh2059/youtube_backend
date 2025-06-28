@@ -17,7 +17,7 @@ const registerUser = asyncHandler( async(req, res)=>{
      // return response
     
      const {fullName, email, username, password} = req.body
-     console.log("email: ", email)
+    // console.log("body ",req.body)
     
      if(
         [fullName,email,username,password].some((field)=>field?.trim()==="")
@@ -26,7 +26,7 @@ const registerUser = asyncHandler( async(req, res)=>{
         throw new ApiError(400, "All fields are is required")
      }
 
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or:[{ username },{ email }]
      })
 
@@ -35,18 +35,28 @@ const registerUser = asyncHandler( async(req, res)=>{
      }
 
  //  [0] gives object for getting path
-     const avtarLocalPath = req.files?.avatar[0]?.path;
-     const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+//  console.log("file: ",req.files)
+     const avatarLocalPath = req.files?.avatar[0]?.path;
+
+     console.log("avtar loal path found",avatarLocalPath)
+
+    //  const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+     let coverImageLocalPath;
+     if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length>0){
+      coverImageLocalPath = req.files.coverImage[0].path
+     }
    
-      if(!avtarLocalPath) {
+      if(!avatarLocalPath) {
         throw new ApiError(400,"Avatar file is reqquired")
       }
 
-  const avatar =   await uploadOnCloudinary(avtarLocalPath)
+  const avatar =   await uploadOnCloudinary(avatarLocalPath)
   const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 
-  if(!avtar){
-    throw new ApiError(400,"Avatar file is reqquired")
+  if(!avatar){
+    throw new ApiError(400,"Avatar file url is reqquired")
   }
 
 
@@ -62,7 +72,7 @@ const registerUser = asyncHandler( async(req, res)=>{
 
   })
 
- const createdUser =  User.findById(user._id).select(
+ const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
   )
 

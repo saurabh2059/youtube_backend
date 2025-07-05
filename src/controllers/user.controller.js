@@ -170,8 +170,8 @@ const logoutUser = asyncHandler(async(req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set: {
-                refreshToken: undefined
+            $unset: {
+                refreshToken: 1
             }
         },
         {
@@ -312,7 +312,7 @@ const user= await User.findByIdAndUpdate(
  ).select("-password")
 
 return res
-.staus(200)
+.status(200)
 .json(
   new ApiResponse(200,user,"avatar updated success")
 )
@@ -343,7 +343,7 @@ const user= await User.findByIdAndUpdate(
  ).select("-password")
 
  return res
-.staus(200)
+.status(200)
 .json(
   new ApiResponse(200,user,"cover Image updated success")
 )
